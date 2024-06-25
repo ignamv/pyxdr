@@ -21,7 +21,7 @@ classifiers = [
   "Programming Language :: Python"
 ]
 [project.optional-dependencies]
-dev = ["pytest","ruff"]
+dev = ["pytest","ruff","pre-commit"]
 [project.urls]
 Homepage = "https://example.com"
 Documentation = "https://readthedocs.org"
@@ -29,8 +29,12 @@ Repository = "https://github.com/me/spam.git"
 "Bug Tracker" = "https://github.com/me/spam/issues"
 Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 [tool.hatch.envs.default.scripts]
-dev = "pip install -e.[dev]"
+dev = [
+    "pip install -e.[dev]",
+    "pre-commit install",
+]
 test = "pytest"
 format = "ruff format"
+lint = "ruff check src tests"
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyxdr.py"]
