@@ -1,11 +1,16 @@
 from abc import ABC, abstractmethod
 import struct
 import typing
+import enum
 
 
 class Serializable(ABC):
     @abstractmethod
-    def pack(self) -> bytes:
+    def pack(self, value) -> bytes:
+        pass
+
+    @abstractmethod
+    def unpack(self, value: bytes):
         pass
 
 
@@ -30,7 +35,32 @@ def native_type(native):
 
 
 @native_type(bytes)
-class Opaque(XDRPrimitive):
+class FixedOpaque(XDRPrimitive):
+    """Fixed-length opaque data"""
+
+    def __init__(self, length):
+        self.length = length
+        self.padded_length = length + (-length) % 4
+
+    def pack(self, value: bytes) -> bytes:
+        if len(value) > self.length:
+            raise ValueError(
+                f"Tried to pack value with length {len(value)} in Opaque of length {self.length}"
+            )
+        padding = b"\x00" * (self.padded_length - len(value))
+        return value + padding
+
+    def unpack(self, packed: bytes) -> bytes:
+        value, packed = packed[: self.length], packed[self.padded_length :]
+        return value, packed
+
+
+@native_type(bytes)
+class VarOpaque(XDRPrimitive):
+    """Variable-length opaque data"""
+
+    # TODO: implement maximum length
+
     @classmethod
     def pack(self, value: bytes) -> bytes:
         padding = b"\x00" * (-len(value) % 4)
@@ -99,3 +129,18 @@ class Struct(Serializable):
         for name, type_ in typing.get_type_hints(cls, include_extras=True).items():
             kwargs[name], packed = _get_serializer_from_type(type_).unpack(packed)
         return cls(**kwargs), packed
+
+
+class Enum(enum.Enum):
+    @classmethod
+    def _assert_valid(cls, value):
+        if value not in cls:
+            raise ValueError(f"Invalid value {value} for {cls}")
+
+    def pack(self) -> bytes:
+        return UnsignedInt.pack(self.value)
+
+    @classmethod
+    def unpack(cls, buffer: bytes):
+        value, buffer = UnsignedInt.unpack(buffer)
+        return cls(value), buffer

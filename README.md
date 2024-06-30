@@ -11,13 +11,19 @@ $ pip install pyxdr
 ## Usage
 
 ```python
->>> from pyxdr import Int, UnsignedInt, Opaque, Struct
+>>> from pyxdr import Int, UnsignedInt, VarOpaque, Struct
 ```
 
 ### Primitive types
 
+Types without options (e.g. Int, UnsignedInt) don't need to be instanced:
+`pack` and `unpack` are class methods.
+Types with options (e.g. FixedOpaque, which has a length, and VarOpaque, which has an optional maximum length) have to be instanced.
+
 ```python
 >>> UnsignedInt.pack(4)
+b'\x00\x00\x00\x04'
+>>> UnsignedInt().pack(4) # Also works
 b'\x00\x00\x00\x04'
 >>> # unpack returns a tuple with (unpacked value, remaining buffer)
 >>> UnsignedInt.unpack(b'\x00\x00\x00\x04')
@@ -26,9 +32,9 @@ b'\x00\x00\x00\x04'
 b'\xff\xff\xff\xfd'
 >>> Int.unpack(b'\xff\xff\xff\xfd')
 (-3, b'')
->>> Opaque.pack(b'pepe')
+>>> VarOpaque().pack(b'pepe')
 b'\x00\x00\x00\x04pepe'
->>> Opaque.unpack(b'\x00\x00\x00\x04pepe')
+>>> VarOpaque().unpack(b'\x00\x00\x00\x04pepe')
 (b'pepe', b'')
 ```
 
@@ -40,7 +46,7 @@ The only condition is that the attributes use the type hints provided by `pyxdr`
 ```python
 >>> class MyClass(Struct):
 ...     a: UnsignedInt.hint
-...     b: Opaque.hint
+...     b: VarOpaque().hint
 ...     def __init__(self, a, b):
 ...         # If using dataclasses/attrs/pydantic you would omit this
 ...         self.a = a
