@@ -1,5 +1,5 @@
 import pytest
-from pyxdr import UnsignedInt, Int, VarOpaque, Struct, FixedOpaque, Enum
+from pyxdr import UnsignedInt, Int, VarOpaque, Struct, FixedOpaque, Enum, Float
 from dataclasses import dataclass
 
 
@@ -53,6 +53,7 @@ testcases = [
     (UnsignedInt, bytes([0, 0, 0, 17]), 17),
     (Int, bytes([0, 0, 0, 17]), 17),
     (Int, bytes([0xFF, 0xFF, 0xFF, 0xFE]), -2),
+    (Float, bytes([62, 32, 0, 0]), 0.15625),
     (VarOpaque(), bytes([0, 0, 0, 3, 5, 6, 7, 0]), b"\x05\x06\x07"),
     (FixedOpaque(3), bytes([5, 6, 7, 0]), b"\x05\x06\x07"),
     (MyEnum, bytes([0, 0, 0, 1]), MyEnum.RED),

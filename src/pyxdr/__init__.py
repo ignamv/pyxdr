@@ -87,6 +87,11 @@ class Int(XDRPrimitive):
     format_ = ">i"
 
 
+@native_type(float)
+class Float(XDRPrimitive):
+    format_ = ">f"
+
+
 def _get_serializer_from_type(type_):
     if typing.get_origin(type_) is typing.Annotated:
         # The annotation might be a class (for types without options e.g. Int)
