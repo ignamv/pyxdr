@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "pyxdr"
 version = "0.1"
 dependencies = [
-    "attrs",
 ]
 requires-python = ">=3.9"
 authors = [

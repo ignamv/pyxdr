@@ -1,20 +1,20 @@
 import pytest
 from pyxdr import UnsignedInt, Int, VarOpaque, Struct, FixedOpaque, Enum
-from attrs import define
+from dataclasses import dataclass
 
 
-@define
+@dataclass
 class MyStruct(Struct):
     a: Int.hint
     b: VarOpaque().hint
 
 
-@define
+@dataclass
 class WrapperStruct(Struct):
     a: MyStruct
 
 
-@define
+@dataclass
 class ParentStruct(Struct):
     a: Int.hint
     b: MyStruct
@@ -30,7 +30,7 @@ def test_fixed_opaque():
 def test_fixed_opaque_as_member():
     """Check that the options in type hints are respected"""
 
-    @define
+    @dataclass
     class TmpWrapper(Struct):
         a: FixedOpaque(3).hint
 
