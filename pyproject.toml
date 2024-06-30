@@ -32,7 +32,7 @@ dev = [
     "pip install -e.[dev]",
     "pre-commit install",
 ]
-test = "pytest"
+test = "pytest {args}"
 format = "ruff format"
 lint = "ruff check src tests"
 [tool.hatch.build.targets.wheel]
