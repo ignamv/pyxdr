@@ -27,6 +27,16 @@ def test_fixed_opaque():
         FixedOpaque(3).pack(b"\x05\x06\x07\x08")
 
 
+def test_fixed_opaque_as_member():
+    """Check that the options in type hints are respected"""
+
+    @define
+    class TmpWrapper(Struct):
+        a: FixedOpaque(3).hint
+
+    assert TmpWrapper(a=b"\x05\x06").pack() == bytes([5, 6, 0, 0])
+
+
 class MyEnum(Enum):
     RED = 1
     BLUE = 4

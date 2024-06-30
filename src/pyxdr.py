@@ -34,13 +34,16 @@ def native_type(native):
     return inner
 
 
-@native_type(bytes)
 class FixedOpaque(XDRPrimitive):
     """Fixed-length opaque data"""
 
     def __init__(self, length):
         self.length = length
         self.padded_length = length + (-length) % 4
+
+    @property
+    def hint(self):
+        return typing.Annotated[bytes, self]
 
     def pack(self, value: bytes) -> bytes:
         if len(value) > self.length:
@@ -86,8 +89,12 @@ class Int(XDRPrimitive):
 
 def _get_serializer_from_type(type_):
     if typing.get_origin(type_) is typing.Annotated:
+        # The annotation might be a class (for types without options e.g. Int)
+        # or an instance (for types with options e.g. FixedOpaque)
         (serializer,) = [
-            cls for cls in typing.get_args(type_) if issubclass(cls, Serializable)
+            x
+            for x in typing.get_args(type_)
+            if isinstance(x, Serializable) or issubclass(x, Serializable)
         ]
     else:
         assert issubclass(type_, Serializable)
